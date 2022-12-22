@@ -7,20 +7,15 @@
 #include "tusb.h"
 
 #include "Portal.hpp"
+#include "Server.hpp"
 
 int main()
 {
     stdio_init_all();
 
-    if(cyw43_arch_init())
-    {
-        printf("WiFi init failed");
-        return -1;
-    }
+    Server* server = new Server();
 
 	board_init();
-
-	tusb_init();
 
 	gpio_init(14);
 
@@ -28,9 +23,11 @@ int main()
 
 	gpio_pull_up(14);
 
+	tusb_init();
 
     while(true)
     {
+		server->Poll();
         tud_task();
 		Portal::GetPortal()->PortalTask();
 		if(!gpio_get(14))
