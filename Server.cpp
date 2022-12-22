@@ -97,14 +97,10 @@ err_t Server::Recv(struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
         tcp_recved(tpcb, p->tot_len);
     }
 
-    std::string data = "<html><body><h1>HTTP 200 Status Code Sample with HTTP Request Methods</h1></body></html>\r\n\r\n";
-
-    memset(buffer_sent, 0, 2048);
-
-    memcpy(buffer_sent, data.c_str(), data.length());
+    std::string data = "<html><body><h1>HTTP 200 Status Code Sample with HTTP Request Methods</h1></body></html>";
 
     err = ERR_OK;
-    err = tcp_write(client_pcb, buffer_sent, 2048, TCP_WRITE_FLAG_COPY);
+    err = tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
 
     pbuf_free(p);
 
