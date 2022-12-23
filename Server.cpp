@@ -3,6 +3,52 @@
 #include <stdio.h>
 #include <string>
 
+int parse_http_request(char* buffer, http_request_t* request) {
+  char* token;
+  int i;
+
+  /* Parse method */
+  token = strtok(buffer, " ");
+  if (!token) return -1;
+  strncpy(request->method, token, MAX_METHOD_LEN-1);
+
+  /* Parse URL */
+  token = strtok(NULL, " ");
+  if (!token) return -1;
+  strncpy(request->url, token, MAX_URL_LEN-1);
+
+  /* Parse version */
+  token = strtok(NULL, "\r\n");
+  if (!token) return -1;
+  strncpy(request->version, token, MAX_VERSION_LEN-1);
+
+  /* Parse headers */
+  request->num_headers = 0;
+  while (1) {
+    char* key = strtok(NULL, ":");
+    char* value = strtok(NULL, "\r\n");
+    if (!key || !value) break;
+    strncpy(request->headers[request->num_headers][0], key, 1023);
+    strncpy(request->headers[request->num_headers][1], value, 1023);
+    request->num_headers++;
+  }
+
+  /* Trim leading and trailing whitespace from headers */
+  for (i = 0; i < request->num_headers; i++) {
+    int j;
+    for (j = 0; request->headers[i][0][j] && isspace(request->headers[i][0][j]); j++);
+    strcpy(request->headers[i][0], request->headers[i][0]+j);
+    for (j = strlen(request->headers[i][0])-1; j >= 0 && isspace(request->headers[i][0][j]); j--);
+    request->headers[i][0][j+1] = '\0';
+    for (j = 0; request->headers[i][1][j] && isspace(request->headers[i][1][j]); j++);
+    strcpy(request->headers[i][1], request->headers[i][1]+j);
+    for (j = strlen(request->headers[i][1])-1; j >= 0 && isspace(request->headers[i][1][j]); j--);
+    request->headers[i][1][j+1] = '\0';
+  }
+
+  return 0;
+}
+
 err_t tcp_server_accept(void* arg, struct tcp_pcb* pcb, err_t err)
 {
     Server* server = (Server*)arg;
@@ -97,13 +143,28 @@ err_t Server::Recv(struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
         tcp_recved(tpcb, p->tot_len);
     }
 
-    std::string data = "<html><body><h1>HTTP 200 Status Code Sample with HTTP Request Methods</h1></body></html>";
-
-    err = ERR_OK;
-    err = tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
-
     pbuf_free(p);
 
+    http_request_t request;
+
+    if (parse_http_request(buffer_recv, &request) < 0) {
+        /* An error occurred while parsing the request */
+        return ERR_BUF;
+    }
+
+    err = ERR_OK;
+
+    std::string method(request.method);
+
+    if(method.rfind("GET", 0) == 0)
+    {
+        
+    }
+
+    std::string data = "HTTP/1.1 404 Not Found\r\n";
+
+    err = tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
+    
     return err;
 }
 
