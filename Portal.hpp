@@ -28,5 +28,5 @@ class Portal
     Portal();
     std::queue<Command> commands = std::queue<Command>();
     bool active = false;
-    int counter = 0;
+    unsigned char counter = 0;
 };
