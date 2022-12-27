@@ -25,7 +25,7 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(PicoWPortal PicoWPortal.cpp Portal.cpp device_descriptor.cpp Server.cpp )
+add_executable(PicoWPortal PicoWPortal.cpp Portal.cpp device_descriptor.cpp Server.cpp Figure.cpp )
 
 pico_set_program_name(PicoWPortal "PicoWPortal")
 pico_set_program_version(PicoWPortal "0.1")

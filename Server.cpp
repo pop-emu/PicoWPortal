@@ -49,19 +49,19 @@ int parse_http_request(char* buffer, http_request_t* request) {
   return 0;
 }
 
-err_t tcp_server_accept(void* arg, struct tcp_pcb* pcb, err_t err)
+static err_t tcp_server_accept(void* arg, struct tcp_pcb* pcb, err_t err)
 {
     Server* server = (Server*)arg;
 
     return server->Accept(pcb, err);
 }
 
-err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
+static err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
 {
     return ((Server*)arg)->Recv(tpcb, p, err);
 }
 
-err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
+static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
 {
     return ((Server*)arg)->Sent(tpcb, len);
 }
@@ -71,7 +71,7 @@ static err_t tcp_server_poll(void *arg, struct tcp_pcb *tpcb)
     return ((Server*)arg)->Poll(tpcb);
 }
 
-void tcp_server_err(void *arg, err_t err) {
+static void tcp_server_err(void *arg, err_t err) {
     ((Server*)arg)->Err(err);
 }
 

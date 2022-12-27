@@ -21,7 +21,7 @@ static err_t tcp_server_accept(void* arg, struct tcp_pcb* pcb, err_t err);
 static err_t tcp_server_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err);
 static err_t tcp_server_sent(void *arg, struct tcp_pcb *tpcb, u16_t len);
 static err_t tcp_server_poll(void *arg, struct tcp_pcb *tpcb);
-void tcp_server_err(void *arg, err_t err);
+static void tcp_server_err(void *arg, err_t err);
 
 class Server
 {

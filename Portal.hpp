@@ -1,4 +1,6 @@
+#pragma once
 #include <queue>
+#include "Figure.hpp"
 
 typedef struct Command 
 {
@@ -6,9 +8,9 @@ typedef struct Command
     union{
         bool activate;
         struct {
-            char index;
-            char block;
-            char data[16];
+            unsigned char index;
+            unsigned char block;
+            unsigned char data[16];
         } query;
     };
 } Command;
@@ -26,6 +28,7 @@ class Portal
 
     private:
     Portal();
+    Figure figures[16];
     std::queue<Command> commands = std::queue<Command>();
     bool active = false;
     unsigned char counter = 0;
