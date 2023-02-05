@@ -31,7 +31,7 @@ add_compile_definitions(WIFI_PASSWORD=\"${WIFI_PASSWORD}\")
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(PicoWPortal Main.cpp )
+add_executable(PicoWPortal Main.cpp DeviceDescriptor.cpp USBDevice.cpp)
 
 pico_set_program_name(PicoWPortal "PicoWPortal")
 pico_set_program_version(PicoWPortal "0.1")
@@ -51,7 +51,9 @@ target_include_directories(PicoWPortal PRIVATE
 
 # Add any user requested libraries
 target_link_libraries(PicoWPortal
-        pico_cyw43_arch_lwip_threadsafe_background
+          pico_cyw43_arch_lwip_poll
+          tinyusb_device
+          tinyusb_board
         )
 
 pico_add_extra_outputs(PicoWPortal)
