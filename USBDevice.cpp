@@ -1,4 +1,5 @@
 #include "tusb.h"
+#include "Portal.hpp"
 
 void tud_mount_cb(void)
 {
@@ -33,7 +34,7 @@ static void send_hid_report(uint8_t report_id, uint32_t btn)
 // Note: For composite reports, report[0] is report ID
 void tud_hid_report_complete_cb(uint8_t instance, uint8_t const* report, uint8_t len)
 {
-	
+	Portal::canSend = true;
 }
 
 // Invoked when received GET_REPORT control request
@@ -52,6 +53,6 @@ void tud_hid_set_report_cb(uint8_t instance, uint8_t report_id, hid_report_type_
 {
 	if(report_type == HID_REPORT_TYPE_OUTPUT)
 	{
-		
+		Portal::HandleCommand(buffer);
 	}
 }

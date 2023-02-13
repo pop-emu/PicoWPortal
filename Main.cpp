@@ -5,6 +5,8 @@
 #include "bsp/board.h"
 #include "tusb.h"
 
+#include "Portal.hpp"
+
 int main()
 {
     stdio_init_all();
@@ -16,9 +18,12 @@ int main()
 
     tusb_init();
 
+    Portal::Initialize();
+
     while(true)
     {
         tud_task();
+        Portal::Poll();
     }
 
     return 0;
