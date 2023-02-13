@@ -5,12 +5,14 @@
 bool Portal::canSend;
 bool Portal::active;
 std::queue<Command> Portal::outgoing;
+unsigned char Portal::counter;
 
 void Portal::Initialize()
 {
     outgoing = std::queue<Command>();
     active = false;
     canSend = true;
+    counter = 0;
 }
 
 void Portal::HandleCommand(const unsigned char* buffer)
@@ -32,20 +34,40 @@ void Portal::HandleCommand(const unsigned char* buffer)
             outgoing.push(command);
             break;
         }
+        case 'S': {
+            Command command = {};
+
+            GetStatus(command.data);
+
+            outgoing.push(command);
+            break;
+        }
     }
 }
 
 void Portal::Poll()
 {
-    if(canSend && !outgoing.empty())
+    if(canSend)
     {
-        unsigned char command[32] = {};
-        memcpy(command, outgoing.front().data, 32);
+        if(!outgoing.empty())
+        {
+            unsigned char command[32] = {};
+            memcpy(command, outgoing.front().data, 32);
 
-        outgoing.pop();
+            outgoing.pop();
 
-        tud_hid_report(0, command, 32);
+            tud_hid_report(0, command, 32);
+        }
+        else
+        {
+            unsigned char command[32] = {};
+            
+            GetStatus(command);
+
+            tud_hid_report(0, command, 32);
+        }
     }
+
 }
 
 void Portal::Enable()
@@ -56,4 +78,17 @@ void Portal::Enable()
 void Portal::Disable()
 {
     active = false;
+}
+
+void Portal::GetStatus(unsigned char* target)
+{
+    unsigned char status[32] = {'S'};
+
+    // TODO: figures
+
+    status[5] = counter++;
+
+    status[6] = (active)? 0x01 : 0x00;
+
+    memcpy(target, status, 32);
 }
