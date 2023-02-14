@@ -6,6 +6,7 @@
 #include "tusb.h"
 
 #include "Portal.hpp"
+#include "Server.hpp"
 
 int main()
 {
@@ -20,10 +21,13 @@ int main()
 
     Portal::Initialize();
 
+    Server::Initialize();
+
     while(true)
     {
         tud_task();
         Portal::Poll();
+        Server::Poll();
     }
 
     return 0;

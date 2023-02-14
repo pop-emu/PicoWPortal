@@ -31,7 +31,7 @@ add_compile_definitions(WIFI_PASSWORD=\"${WIFI_PASSWORD}\")
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(PicoWPortal src/Main.cpp src/DeviceDescriptor.cpp src/Portal.cpp src/USBDevice.cpp)
+add_executable(PicoWPortal src/Main.cpp src/DeviceDescriptor.cpp src/Portal.cpp src/USBDevice.cpp src/Server.cpp)
 
 pico_set_program_name(PicoWPortal "PicoWPortal")
 pico_set_program_version(PicoWPortal "0.1")
