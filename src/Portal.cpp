@@ -58,7 +58,7 @@ void Portal::Poll()
 
             tud_hid_report(0, command, 32);
         }
-        else
+        else if(active)
         {
             unsigned char command[32] = {};
             
