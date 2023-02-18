@@ -16,6 +16,24 @@ void Portal::Initialize()
     active = false;
     canSend = true;
     counter = 0;
+
+    colorLeft = {
+        .red = 0x00,
+        .green = 0x00,
+        .blue = 0x00,
+    };
+
+    colorRight = {
+        .red = 0x00,
+        .green = 0x00,
+        .blue = 0x00,
+    };
+
+    colorTrap = {
+        .red = 0x00,
+        .green = 0x00,
+        .blue = 0x00,
+    };
 }
 
 void Portal::HandleCommand(const unsigned char* buffer)
