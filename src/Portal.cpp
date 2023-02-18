@@ -6,6 +6,9 @@ bool Portal::canSend;
 bool Portal::active;
 std::queue<Command> Portal::outgoing;
 unsigned char Portal::counter;
+Color Portal::colorLeft;
+Color Portal::colorRight;
+Color Portal::colorTrap;
 
 void Portal::Initialize()
 {
@@ -40,6 +43,76 @@ void Portal::HandleCommand(const unsigned char* buffer)
             GetStatus(command.data);
 
             outgoing.push(command);
+            break;
+        }
+        case 'C': {
+            Command command = {};
+
+            Color color = {
+                .red = buffer[1],
+                .green = buffer[2],
+                .blue = buffer[3],
+            };
+
+            colorLeft = color;
+            colorRight = color;
+
+            memcpy(command.data, buffer, 4);
+
+            outgoing.push(command);
+            break;
+        }
+        case 'J': {
+
+            Color color = {
+                .red = buffer[2],
+                .green = buffer[3],
+                .blue = buffer[4],
+            };
+
+            switch(buffer[1])
+            {
+                case 0x00: {
+                    colorRight = color;
+                    break;
+                }
+                case 0x01: {
+                    colorLeft = color;
+                    colorRight = color;
+                    break;
+                }
+                case 0x02: {
+                    colorLeft = color;
+                    break;
+                }
+            }
+
+            break;
+        }
+        case 'L': {
+
+            Color color = {
+                .red = buffer[2],
+                .green = buffer[3],
+                .blue = buffer[4],
+            };
+
+            switch(buffer[1])
+            {
+                case 0x00: {
+                    colorRight = color;
+                    break;
+                }
+                case 0x01: {
+                    colorTrap = color;
+                    break;
+                }
+                case 0x02: {
+                    colorLeft = color;
+                    break;
+                }
+            }
+
             break;
         }
     }
