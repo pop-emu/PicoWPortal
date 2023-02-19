@@ -1,4 +1,5 @@
 #include <queue>
+#include "Figure.hpp"
 
 struct Command {
     unsigned char data[32];
@@ -26,4 +27,5 @@ private:
     static Color colorLeft;
     static Color colorRight;
     static Color colorTrap;
+    static Figure figures[16];
 };
