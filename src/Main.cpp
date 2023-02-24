@@ -12,11 +12,6 @@ int main()
 {
     stdio_init_all();
 
-    if (cyw43_arch_init()) {
-        printf("WiFi init failed");
-        return -1;
-    }
-
     tusb_init();
 
     Portal::Initialize();

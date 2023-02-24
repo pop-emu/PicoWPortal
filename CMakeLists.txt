@@ -57,4 +57,3 @@ target_link_libraries(PicoWPortal
         )
 
 pico_add_extra_outputs(PicoWPortal)
-
