@@ -8,6 +8,9 @@ enum Status {
 class Figure {
 public:
     Figure();
-    unsigned char data[1024];
+    unsigned char GetByte(char block, char offset);
+    unsigned short GetShort(char block, char offset);
     Status status;
+    unsigned char data[1024];
+    
 };

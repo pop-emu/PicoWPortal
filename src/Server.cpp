@@ -24,9 +24,13 @@ void Server::Initialize()
 		printf("Failed to connect");
 	}
 
-    char* ip = ip4addr_ntoa(netif_ip4_addr(netif_list));
+    char* ip = ip4addr_ntoa(netif_ip4_addr(netif_default));
 
 	printf("My ip is %s", ip);
+
+    const char* hostname = netif_get_hostname(netif_default);
+
+    printf("My hostname is %s", hostname);
 
     struct tcp_pcb *pcb = tcp_new_ip_type(IPADDR_TYPE_ANY);
 
@@ -133,7 +137,9 @@ err_t Server::Recieved(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
                 Figure figure = Portal::figures[i];
 
                 std::string figureData =    "{"
-                                                "\"status\":" + std::to_string(figure.status) +
+                                                "\"status\":" + std::to_string(figure.status) + ","
+                                                "\"id\":" + std::to_string(figure.GetShort(0x01, 0x00)) + ","
+                                                "\"variant\":" + std::to_string(figure.GetShort(0x01, 0x0C)) +
                                             "}";
 
                 if(i < 15)
