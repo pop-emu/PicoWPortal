@@ -6,6 +6,8 @@ unsigned int Server::recv_count;
 unsigned char Server::buffer_sent[2048];
 unsigned char Server::buffer_recv[2048];
 
+const std::string headers = "Access-Control-Allow-Origin: *\r\n";
+
 void Server::Initialize()
 {
     if (cyw43_arch_init()) {
@@ -106,6 +108,14 @@ err_t Server::Sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
 
 err_t Server::Recieved(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
 {
+
+    if(!p)
+    {
+        return ERR_BUF;
+    }
+
+    cyw43_arch_lwip_check();
+
     if(p->tot_len > 0)
     {
         const uint16_t left = 2048 - recv_count;
@@ -119,7 +129,7 @@ err_t Server::Recieved(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
 
     if(request.method.rfind("GET", 0) == 0)
     {
-        if(request.path.rfind("/api/v1/info", 0) == 0)
+        if(PathsMatch(request.path, "/api/v1/info"))
         {
             std::string json =  "{"
                                     "\"name\":\"PicoWPortal\","
@@ -128,7 +138,7 @@ err_t Server::Recieved(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
 
             return RespondJSON(json);
         }
-        if(request.path.rfind("/api/v1/status", 0) == 0)
+        if(PathsMatch(request.path, "/api/v1/status"))
         {
             std::string figures = "";
 
@@ -217,7 +227,7 @@ HttpRequest Server::ParseHttpRequest(char* request) {
 
 err_t Server::RespondNotFound()
 {
-    std::string data = "HTTP/1.1 404 Not Found\r\n\r\n";
+    std::string data = "HTTP/1.1 404 Not Found\r\n" + headers + "\r\n";
 
     return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
 }
@@ -228,8 +238,54 @@ err_t Server::RespondJSON(std::string json)
                     "Content-Type: application/json\r\n" \
                     "Content-Length: " +
                     std::to_string(json.length()) +
-                    "\r\n\r\n" +
+                    "\r\n" + headers + "\r\n" +
                     json;
 
     return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
+}
+
+bool PathsMatch(std::string given, std::string expected)
+{
+    bool expectedClosingSlash = (expected.at(expected.size() - 1) == '/');
+    bool givenClosingSlash = (given.at(given.size() - 1) == '/');
+
+    if(given.rfind(expected, 0) == 0)
+    {
+        if(expectedClosingSlash)
+        {
+            if(givenClosingSlash)
+            {
+                if(expected.size() == given.size())
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if(expected.size() - 1 == given.size())
+                {
+                    return true;
+                }
+            }
+        }
+        else
+        {
+            if(givenClosingSlash)
+            {
+                if(expected.size() == given.size() -1)
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if(expected.size() == given.size())
+                {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 }

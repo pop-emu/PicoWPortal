@@ -13,6 +13,8 @@ struct HttpRequest {
     std::string body;
 };
 
+bool PathsMatch(std::string given, std::string expected);
+
 class Server {
 public:
     static void Initialize();
