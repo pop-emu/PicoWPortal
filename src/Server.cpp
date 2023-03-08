@@ -5,6 +5,7 @@ tcp_pcb* Server::client_pcb;
 unsigned int Server::recv_count;
 unsigned char Server::buffer_sent[2048];
 unsigned char Server::buffer_recv[2048];
+Route Server::routes[ROUTE_COUNT];
 
 const std::string headers = "Access-Control-Allow-Origin: *\r\n";
 
@@ -44,6 +45,82 @@ void Server::Initialize()
 
     // turn led on to signal the network has been initialized
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
+
+    //regex template: https://regex101.com/r/txr8Q6/1
+
+    routes[0] = {
+        "^/api/v1/info(/)?$",
+        "GET",
+        InfoRoute
+    };
+
+    routes[1] = {
+        "^/api/v1/status(/)?$",
+        "GET",
+        StatusRoute
+    };
+}
+
+err_t Server::InfoRoute(HttpRequest*)
+{
+    std::string json =  "{"
+                            "\"name\":\"PicoWPortal\","
+                            "\"version\":\"0.0.1\""
+                        "}";
+
+    return RespondJSON(json);
+}
+
+err_t Server::StatusRoute(HttpRequest*)
+{
+    std::string figures = "";
+
+    for(unsigned char i = 0; i < 16; i++)
+    {
+        Figure figure = Portal::figures[i];
+
+        std::string figureData =    "{"
+                                        "\"status\":" + std::to_string(figure.status) + ","
+                                        "\"id\":" + std::to_string(figure.GetShort(0x01, 0x00)) + ","
+                                        "\"variant\":" + std::to_string(figure.GetShort(0x01, 0x0C)) +
+                                    "}";
+
+        if(i < 15)
+        {
+            figureData += std::string(",");
+        }
+
+        figures += figureData;
+    }
+
+    std::string json =  "{"
+                            "\"portal\": {"
+                                "\"active\":" + std::string((Portal::active)? "true" : "false") + ","
+                                "\"counter\":" + std::to_string(Portal::counter) + ","
+                                "\"colors\":{"
+                                    "\"left\":{"
+                                        "\"red\":" + std::to_string(Portal::colorLeft.red) + ","
+                                        "\"green\":" + std::to_string(Portal::colorLeft.green) + ","
+                                        "\"blue\":" + std::to_string(Portal::colorLeft.blue) +
+                                    "},"
+                                    "\"right\":{"
+                                        "\"red\":" + std::to_string(Portal::colorRight.red) + ","
+                                        "\"green\":" + std::to_string(Portal::colorRight.green) + ","
+                                        "\"blue\":" + std::to_string(Portal::colorRight.blue) +
+                                    "},"
+                                    "\"trap\":{"
+                                        "\"red\":" + std::to_string(Portal::colorTrap.red) + ","
+                                        "\"green\":" + std::to_string(Portal::colorTrap.green) + ","
+                                        "\"blue\":" + std::to_string(Portal::colorTrap.blue) +
+                                    "}"
+                                "}"
+                            "},"
+                            "\"figures\":[" 
+                                + figures +
+                            "]"
+                        "}";
+
+    return RespondJSON(json);
 }
 
 void Server::Poll()
@@ -106,6 +183,27 @@ err_t Server::Sent(void *arg, struct tcp_pcb *tpcb, u16_t len)
     return CloseClient();
 }
 
+err_t Server::RequestRoute(HttpRequest* req)
+{
+    for (char i = 0; i < ROUTE_COUNT; i++) {
+
+        Route route = routes[i];
+		// match request path with route regex
+		std::regex pat {route.url_regex};
+		std::smatch match;
+
+		if (std::regex_match(req->path, match, pat) 
+				&& (req->method.compare(route.request_method) == 0)) {
+			// call callback
+			return route.callback(req);
+			// exit for loop
+			break;
+		}
+	}
+
+    return RespondNotFound();
+}
+
 err_t Server::Recieved(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err)
 {
 
@@ -127,71 +225,7 @@ err_t Server::Recieved(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
 
     HttpRequest request = ParseHttpRequest((char *)buffer_recv);
 
-    if(request.method.rfind("GET", 0) == 0)
-    {
-        if(PathsMatch(request.path, "/api/v1/info"))
-        {
-            std::string json =  "{"
-                                    "\"name\":\"PicoWPortal\","
-                                    "\"version\":\"0.0.1\""
-                                "}";
-
-            return RespondJSON(json);
-        }
-        if(PathsMatch(request.path, "/api/v1/status"))
-        {
-            std::string figures = "";
-
-            for(unsigned char i = 0; i < 16; i++)
-            {
-                Figure figure = Portal::figures[i];
-
-                std::string figureData =    "{"
-                                                "\"status\":" + std::to_string(figure.status) + ","
-                                                "\"id\":" + std::to_string(figure.GetShort(0x01, 0x00)) + ","
-                                                "\"variant\":" + std::to_string(figure.GetShort(0x01, 0x0C)) +
-                                            "}";
-
-                if(i < 15)
-                {
-                    figureData += std::string(",");
-                }
-
-                figures += figureData;
-            }
-
-            std::string json =  "{"
-                                    "\"portal\": {"
-                                        "\"active\":" + std::string((Portal::active)? "true" : "false") + ","
-                                        "\"counter\":" + std::to_string(Portal::counter) + ","
-                                        "\"colors\":{"
-                                            "\"left\":{"
-                                                "\"red\":" + std::to_string(Portal::colorLeft.red) + ","
-                                                "\"green\":" + std::to_string(Portal::colorLeft.green) + ","
-                                                "\"blue\":" + std::to_string(Portal::colorLeft.blue) +
-                                            "},"
-                                            "\"right\":{"
-                                                "\"red\":" + std::to_string(Portal::colorRight.red) + ","
-                                                "\"green\":" + std::to_string(Portal::colorRight.green) + ","
-                                                "\"blue\":" + std::to_string(Portal::colorRight.blue) +
-                                            "},"
-                                            "\"trap\":{"
-                                                "\"red\":" + std::to_string(Portal::colorTrap.red) + ","
-                                                "\"green\":" + std::to_string(Portal::colorTrap.green) + ","
-                                                "\"blue\":" + std::to_string(Portal::colorTrap.blue) +
-                                            "}"
-                                        "}"
-                                    "},"
-                                    "\"figures\":[" 
-                                        + figures +
-                                    "]"
-                                "}";
-
-            return RespondJSON(json);
-        }
-    }
-    
-    return RespondNotFound();
+    return RequestRoute(&request);
 
 }
 

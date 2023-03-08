@@ -5,12 +5,21 @@
 #include <string>
 #include <sstream>
 #include "Portal.hpp"
+#include <regex>
+
+#define ROUTE_COUNT 2
 
 struct HttpRequest {
     std::string method;
     std::string path;
     std::string version;
     std::string body;
+};
+
+struct Route {
+    std::string url_regex;
+    std::string request_method;
+    err_t (*callback)(HttpRequest*);
 };
 
 bool PathsMatch(std::string given, std::string expected);
@@ -29,6 +38,10 @@ public:
     static void Error(void *arg, err_t err);
 
     static HttpRequest ParseHttpRequest(char* request);
+    static err_t RequestRoute(HttpRequest*);
+
+    static err_t InfoRoute(HttpRequest*);
+    static err_t StatusRoute(HttpRequest*);
 
     static err_t RespondNotFound();
     static err_t RespondJSON(std::string json);
@@ -39,4 +52,5 @@ private:
     static unsigned int recv_count;
     static unsigned char buffer_sent[2048];
     static unsigned char buffer_recv[2048];
+    static Route routes[ROUTE_COUNT];
 };
