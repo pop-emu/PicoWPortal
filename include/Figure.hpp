@@ -1,8 +1,8 @@
 enum Status {
-    NOT_PRESENT = 0x00,
-    PRESENT = 0x01,
-    ADDED = 0x11,
-    REMOVED = 0x10
+    NOT_PRESENT = 0b00,
+    PRESENT = 0b01,
+    ADDED = 0b11,
+    REMOVED = 0b10
 };
 
 class Figure {
