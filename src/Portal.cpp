@@ -342,6 +342,8 @@ void Portal::RemoveFigure(char index)
 {
     figures[index].status = REMOVED;
 
+    memset(figures[index].data, 0, 1024);
+
     unsigned char command[32] = {};
 
     GetStatus(command);
