@@ -7,7 +7,7 @@
 #include "Portal.hpp"
 #include <regex>
 
-#define ROUTE_COUNT 3
+#define ROUTE_COUNT 4
 
 struct HttpRequest {
     std::string method;
@@ -43,9 +43,11 @@ public:
     static err_t InfoRoute(HttpRequest*);
     static err_t StatusRoute(HttpRequest*);
     static err_t ClearFigureRoute(HttpRequest*);
+    static err_t GetFigureRoute(HttpRequest*);
 
     static err_t RespondNotFound();
     static err_t RespondJSON(std::string json);
+    static err_t RespondBinary(char* data, int size);
     static err_t RespondOK();
 
 private:

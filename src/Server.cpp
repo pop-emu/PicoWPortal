@@ -65,6 +65,12 @@ void Server::Initialize()
         "POST",
         ClearFigureRoute
     };
+
+    routes[3] = {
+        "^/api/v1/figure/([0-9]|1[0-5])/get/?$",
+        "GET",
+        GetFigureRoute
+    };
 }
 
 err_t Server::InfoRoute(HttpRequest*)
@@ -131,13 +137,18 @@ err_t Server::StatusRoute(HttpRequest*)
 
 err_t Server::ClearFigureRoute(HttpRequest* request)
 {
-    char index = 0;
-
-    index = std::stoi(request->path.substr(15, 2));
+    char index = std::stoi(request->path.substr(15, 2));
 
     Portal::RemoveFigure(index);
 
     return RespondOK();
+}
+
+err_t Server::GetFigureRoute(HttpRequest* request)
+{
+    char index = std::stoi(request->path.substr(15, 2));
+
+    return RespondBinary((char*)Portal::figures[index].data, 1024);
 }
 
 void Server::Poll()
@@ -292,12 +303,22 @@ err_t Server::RespondOK()
 
 err_t Server::RespondJSON(std::string json)
 {
-    std::string data =  "HTTP/1.1 200 OK\r\n" \
-                    "Content-Type: application/json\r\n" \
+    std::string data =  "HTTP/1.1 200 OK\r\n"
+                    "Content-Type: application/json\r\n"
                     "Content-Length: " +
                     std::to_string(json.length()) +
                     "\r\n" + headers + "\r\n" +
                     json;
+
+    return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
+}
+
+err_t Server::RespondBinary(char* binary, int length)
+{
+    std::string data =  "HTTP/1.1 200 OK\r\n" 
+                        "Content-Type: application/octet-stream\r\n"
+                        "Content-Length: " + std::to_string(length) + "\r\n" +
+                        headers + "\r\n" + std::string(binary, length) + "\r\n\r\n";
 
     return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
 }
