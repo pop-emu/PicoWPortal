@@ -317,6 +317,15 @@ void Portal::GetStatus(unsigned char *target)
             unsigned char index = (4 * i) + j;
 
             figureStatus |= (figures[index].status << (2 * j));
+
+            if(figures[index].status == REMOVED)
+            {
+                figures[index].status = NOT_PRESENT;
+            }
+            else if(figures[index].status == ADDED)
+            {
+                figures[index].status = PRESENT;
+            }
         }
 
         status[1 + i] = figureStatus;
@@ -327,4 +336,15 @@ void Portal::GetStatus(unsigned char *target)
     status[6] = (active) ? 0x01 : 0x00;
 
     memcpy(target, status, 32);
+}
+
+void Portal::RemoveFigure(char index)
+{
+    figures[index].status = REMOVED;
+
+    unsigned char command[32] = {};
+
+    GetStatus(command);
+
+    tud_hid_report(0, command, 32);
 }

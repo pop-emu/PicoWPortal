@@ -46,7 +46,7 @@ void Server::Initialize()
     // turn led on to signal the network has been initialized
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, 1);
 
-    //regex template: https://regex101.com/r/txr8Q6/1
+    //regex template: https://regex101.com/r/d7mPtE/1
 
     routes[0] = {
         "^/api/v1/info(/)?$",
@@ -58,6 +58,12 @@ void Server::Initialize()
         "^/api/v1/status(/)?$",
         "GET",
         StatusRoute
+    };
+
+    routes[2] = {
+        "^/api/v1/figure/([0-9]|1[0-5])/clear/?$",
+        "POST",
+        ClearFigureRoute
     };
 }
 
@@ -121,6 +127,17 @@ err_t Server::StatusRoute(HttpRequest*)
                         "}";
 
     return RespondJSON(json);
+}
+
+err_t Server::ClearFigureRoute(HttpRequest* request)
+{
+    char index = 0;
+
+    index = std::stoi(request->path.substr(15, 2));
+
+    Portal::RemoveFigure(index);
+
+    return RespondOK();
 }
 
 void Server::Poll()
@@ -262,6 +279,13 @@ HttpRequest Server::ParseHttpRequest(char* request) {
 err_t Server::RespondNotFound()
 {
     std::string data = "HTTP/1.1 404 Not Found\r\n" + headers + "\r\n";
+
+    return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
+}
+
+err_t Server::RespondOK()
+{
+    std::string data = "HTTP/1.1 200 OK\r\n" + headers + "\r\n";
 
     return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
 }
