@@ -22,6 +22,7 @@ public:
     static void Disable();
     static void GetStatus(unsigned char* target);
     static void RemoveFigure(char index);
+    static void AddFigure(char index, const char* data);
     static bool canSend;
     static bool active;
     static std::queue<Command> outgoing;

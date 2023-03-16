@@ -7,13 +7,14 @@
 #include "Portal.hpp"
 #include <regex>
 
-#define ROUTE_COUNT 4
+#define ROUTE_COUNT 5
 
 struct HttpRequest {
     std::string method;
     std::string path;
     std::string version;
     std::string body;
+    int contentLength = 0;
 };
 
 struct Route {
@@ -44,11 +45,13 @@ public:
     static err_t StatusRoute(HttpRequest*);
     static err_t ClearFigureRoute(HttpRequest*);
     static err_t GetFigureRoute(HttpRequest*);
+    static err_t SetFigureRoute(HttpRequest*);
 
     static err_t RespondNotFound();
     static err_t RespondJSON(std::string json);
     static err_t RespondBinary(char* data, int size);
     static err_t RespondOK();
+    static err_t RespondBadRequest();
 
 private:
     static tcp_pcb* server_pcb;

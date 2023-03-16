@@ -350,3 +350,16 @@ void Portal::RemoveFigure(char index)
 
     tud_hid_report(0, command, 32);
 }
+
+void Portal::AddFigure(char index, const char* data)
+{
+    figures[index].status = ADDED;
+
+    memcpy(figures[index].data, data, 1024);
+
+    unsigned char command[32] = {};
+
+    GetStatus(command);
+
+    tud_hid_report(0, command, 32);
+}

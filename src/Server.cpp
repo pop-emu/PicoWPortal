@@ -71,6 +71,12 @@ void Server::Initialize()
         "GET",
         GetFigureRoute
     };
+
+    routes[4] = {
+        "^/api/v1/figure/([0-9]|1[0-5])/set/?$",
+        "POST",
+        SetFigureRoute
+    };
 }
 
 err_t Server::InfoRoute(HttpRequest*)
@@ -149,6 +155,20 @@ err_t Server::GetFigureRoute(HttpRequest* request)
     char index = std::stoi(request->path.substr(15, 2));
 
     return RespondBinary((char*)Portal::figures[index].data, 1024);
+}
+
+err_t Server::SetFigureRoute(HttpRequest* request)
+{
+    if(request->body.length() != 1024)
+    {
+        return RespondBadRequest();
+    }
+    
+    char index = std::stoi(request->path.substr(15, 2));
+
+    Portal::AddFigure(index, request->body.c_str());
+
+    return RespondOK();
 }
 
 void Server::Poll()
@@ -276,12 +296,24 @@ HttpRequest Server::ParseHttpRequest(char* request) {
 
     // Parse the headers
     while (std::getline(stream, line) && !line.empty()) {
-        // Do something with the headers if needed
+        std::size_t pos = line.find(':');
+        if (pos != std::string::npos) {
+            std::string headerName = line.substr(0, pos);
+            std::string headerValue = line.substr(pos + 1);
+            // Do something with the headers if needed
+            if (headerName == "Content-Length") {
+                std::istringstream iss(headerValue);
+                iss >> httpRequest.contentLength;
+            }
+        }
     }
 
     // Parse the body if present
-    if (stream.peek() != EOF) {
-        std::getline(stream, httpRequest.body);
+    if (httpRequest.contentLength > 0) {
+        const char* blank_line = strstr(request, "\r\n\r\n");
+        if (blank_line) {
+            httpRequest.body = std::string(blank_line + 4, httpRequest.contentLength);
+        }
     }
 
     return httpRequest;
@@ -319,6 +351,13 @@ err_t Server::RespondBinary(char* binary, int length)
                         "Content-Type: application/octet-stream\r\n"
                         "Content-Length: " + std::to_string(length) + "\r\n" +
                         headers + "\r\n" + std::string(binary, length) + "\r\n\r\n";
+
+    return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
+}
+
+err_t Server::RespondBadRequest()
+{
+    std::string data = "HTTP/1.1 400 Bad Request\r\n" + headers + "\r\n";
 
     return tcp_write(client_pcb, data.c_str(), data.length(), TCP_WRITE_FLAG_COPY);
 }
