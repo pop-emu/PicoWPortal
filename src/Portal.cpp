@@ -195,6 +195,14 @@ void Portal::HandleCommand(const unsigned char *buf)
 
         break;
     }
+	case 'M':
+	{
+		Command command = {
+            .data = {'M', 0x00}
+        };
+
+        outgoing.push(command);
+	}
     }
 }
 
