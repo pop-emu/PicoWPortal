@@ -25,6 +25,7 @@ void Server::Initialize()
     if(cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000))
 	{
 		printf("Failed to connect");
+		return;
 	}
 
     char* ip = ip4addr_ntoa(netif_ip4_addr(netif_default));
