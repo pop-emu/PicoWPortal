@@ -30,7 +30,7 @@ void Server::Initialize()
 
     char* ip = ip4addr_ntoa(netif_ip4_addr(netif_default));
 
-	printf("My ip is %s", ip);
+    printf("My ip is %s", ip);
 
     const char* hostname = netif_get_hostname(netif_default);
 
