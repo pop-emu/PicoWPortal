@@ -22,7 +22,7 @@ If the network SSID does not exist or the network password is incorrect, the dev
 On devices that run a traditional operating system, like a windows PC, it is possible for the usb handling to crash. If you get a message that the usb device that was inserted could not be recognised, or if the device does not show up, unplugging the device and plugging it back in should fix it. This may take multiple tries. This issue is more prominent on older systems.
 
 ### Server crash
-The way chrome handles sending data has the ability to confuse and crash the server running on the Pico W. I have minimized the chance on the web interface side and it seems to be (mostly) resolved. This is not an issue with my code but an issue with the network abstraction layer LWIP.
+The way chrome handles sending data has the ability to confuse and crash the server running on the Pico W. I have tried to minimize the chance of this happening, but it seems like this is an issue with the networking layer, LWIP, that I'm using. Using an isolated network seems to increase stability.
 
 ## How to acquire the IP address of the device
 There are several ways to obtain the IP address of the device.
