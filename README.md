@@ -19,10 +19,10 @@ After this, the final result should reside at `BUILD_DIR/PicoWPortal.uf2`. This 
 If the network SSID does not exist or the network password is incorrect, the device will not connect and the built-in LED will not turn on. In this case, the project will need to be rebuild with the correct credentials.
 
 ### USB crash
-On devices that run a traditional operating system, like a windows PC, it is possible for the usb handling to crash. If you get a message that the usb device that was inserted could not be recognised, or if the device does not show up, unplugging the device and plugging it back in should fix it. This may take multiple tries. This issue is more prominent on older systems.
+On devices that run a traditional operating system, like a windows PC, it is possible for the usb handling to crash. If you get a message that the usb device that was inserted could not be recognised, or if the device does not show up, unplugging the device and plugging it back in should fix it. This may take multiple tries. This issue is more prominent on older systems. This issue can be subverted by connecting the dvice to a usb port that has a usb controller that isn't being used yet.
 
 ### Server crash
-The way chrome handles sending data has the ability to confuse and crash the server running on the Pico W. I have tried to minimize the chance of this happening, but it seems like this is an issue with the networking layer, LWIP, that I'm using. Using an isolated network seems to increase stability.
+The way chrome handles sending data has the ability to confuse and crash the server running on the Pico W. I have tried to minimize the chance of this happening, but it seems like this is an issue with the networking layer, LWIP, that I'm using. An isolated network, like a hotspot, fixes this issue.
 
 ## How to acquire the IP address of the device
 There are several ways to obtain the IP address of the device.
@@ -31,8 +31,6 @@ There are several ways to obtain the IP address of the device.
 When connected to the device using the Serial Wire Debug interface, setting a breakpoint at the line `printf("My ip is %s", ip);` (approximately line 33), will allow you to read the ip variable which contains the ip address as a char* to a string.
 
 ### Using UART
-**This method is untested since I don't have enough wires.**
-
 When connected to the device using the UARTS pins, the device should log its IP address.
 
 ### Using a network with a small device count
